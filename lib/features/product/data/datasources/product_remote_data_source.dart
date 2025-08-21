@@ -4,6 +4,7 @@ import '../models/product_model.dart';
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts();
   Future<ProductModel> getProductById(String id);
+  Future<ProductModel?> getProductByBarcode(String barcode);
   Future<void> createProduct(ProductModel product);
   Future<void> updateProduct(ProductModel product);
   Future<void> deleteProduct(String id);
@@ -26,6 +27,22 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final response = await client.get('/Products/$id');
 
     return ProductModel.fromJson(response.data);
+  }
+
+  @override
+  Future<ProductModel?> getProductByBarcode(String barcode) async {
+    try {
+      final response = await client.get('/Scans/barcode/$barcode');
+
+      // Basado en la respuesta de Swagger, el producto está en responseData['product']
+      final responseData = response.data;
+      if (responseData != null && responseData['product'] != null) {
+        return ProductModel.fromJson(responseData['product']);
+      }
+      return null;
+    } catch (e) {
+      return null; // Producto no encontrado
+    }
   }
 
   @override

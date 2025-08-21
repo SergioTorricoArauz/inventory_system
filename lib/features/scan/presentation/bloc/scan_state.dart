@@ -12,6 +12,20 @@ class ScanLoading extends ScanState {}
 
 class ScanSuccess extends ScanState {}
 
+class ProductFound extends ScanState {
+  final Product product;
+  const ProductFound({required this.product});
+  @override
+  List<Object?> get props => [product];
+}
+
+class ProductNotFound extends ScanState {
+  final String barcode;
+  const ProductNotFound({required this.barcode});
+  @override
+  List<Object?> get props => [barcode];
+}
+
 class ScanHistoryLoaded extends ScanState {
   final List<Scan> scans;
   const ScanHistoryLoaded({required this.scans});

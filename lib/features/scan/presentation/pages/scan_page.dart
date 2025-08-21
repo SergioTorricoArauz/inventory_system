@@ -30,15 +30,70 @@ class _ScanPageState extends State<ScanPage> {
       // Reproduce el sonido
       _audioPlayer.play(AssetSource('beep.mp3'));
 
-      // Envía el escaneo al backend
+      // Busca el producto por código de barras
       context.read<ScanCubit>().scanBarcode(raw);
 
       // Feedback visual
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Escaneo enviado al servidor')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Buscando producto...')));
     }
+  }
+
+  void _showProductDialog(BuildContext context, product) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(width: 8),
+              Text('Producto Encontrado'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Nombre: ${product.name}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text('Código: ${product.barcode}'),
+              const SizedBox(height: 4),
+              Text('Precio: \$${product.price.toStringAsFixed(2)}'),
+              const SizedBox(height: 4),
+              Text('Stock: ${product.stockQuantity} unidades'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cerrar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Aquí podrías agregar lógica para agregar a carrito, etc.
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✓ Producto verificado'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -80,7 +135,7 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Escaneando productos para venta',
+                  'Buscando productos por código de barras',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -89,7 +144,7 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Apunta la cámara hacia el código de barras',
+                  'Apunta la cámara hacia el código de barras del producto',
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
               ],
@@ -106,11 +161,16 @@ class _ScanPageState extends State<ScanPage> {
                       backgroundColor: Colors.red,
                     ),
                   );
-                } else if (state is ScanSuccess) {
+                } else if (state is ProductFound) {
+                  _showProductDialog(context, state.product);
+                } else if (state is ProductNotFound) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✓ Producto escaneado exitosamente'),
-                      backgroundColor: Colors.green,
+                    SnackBar(
+                      content: Text(
+                        '❌ Producto no encontrado con código: ${state.barcode}',
+                      ),
+                      backgroundColor: Colors.orange,
+                      duration: const Duration(seconds: 3),
                     ),
                   );
                 }
@@ -143,7 +203,7 @@ class _ScanPageState extends State<ScanPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       SizedBox(width: 12),
-                      Text('Procesando escaneo...'),
+                      Text('Buscando producto...'),
                     ],
                   ),
                 );

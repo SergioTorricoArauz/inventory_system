@@ -50,4 +50,10 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> deleteProduct(String id) async {
     await remoteDataSource.deleteProduct(id);
   }
+
+  @override
+  Future<Product?> getProductByBarcode(String barcode) async {
+    final model = await remoteDataSource.getProductByBarcode(barcode);
+    return model?.toEntity();
+  }
 }

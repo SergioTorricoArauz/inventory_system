@@ -8,6 +8,7 @@ import 'package:inventory_system/features/scan/data/repositories/scan_repo_impl.
 import 'package:inventory_system/features/product/domain/repositories/product_repository.dart';
 import 'package:inventory_system/features/product/domain/usecases/get_products.dart';
 import 'package:inventory_system/features/product/domain/usecases/get_product_by_id.dart';
+import 'package:inventory_system/features/product/domain/usecases/get_product_by_barcode.dart';
 import 'package:inventory_system/features/product/domain/usecases/create_product.dart';
 import 'package:inventory_system/features/product/domain/usecases/update_product.dart';
 import 'package:inventory_system/features/product/domain/usecases/delete_product.dart';
@@ -48,7 +49,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddScanUseCase(sl()));
   sl.registerLazySingleton(() => GetScansUseCase(sl()));
   // Cubit / Bloc
-  sl.registerFactory(() => ScanCubit(addScan: sl(), getScans: sl()));
+  sl.registerFactory(
+    () => ScanCubit(addScan: sl(), getScans: sl(), getProductByBarcode: sl()),
+  );
 
   // Product Feature
   // Data Source
@@ -62,6 +65,7 @@ Future<void> init() async {
   // UseCases
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetProductByIdUseCase(sl()));
+  sl.registerLazySingleton(() => GetProductByBarcode(repository: sl()));
   sl.registerLazySingleton(() => CreateProductUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProductUseCase(sl()));
   sl.registerLazySingleton(() => DeleteProductUseCase(sl()));
