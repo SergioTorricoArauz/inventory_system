@@ -14,11 +14,13 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final TextEditingController _barcodeController = TextEditingController();
   String? _lastScanned;
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _barcodeController.dispose();
     super.dispose();
   }
 
@@ -96,6 +98,93 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
+  void _showManualInputDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.keyboard, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Ingresar Código Manual'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Ingresa el código de barras manualmente:',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _barcodeController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Código de barras',
+                  hintText: 'Ej: 1234567890123',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.qr_code),
+                ),
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    Navigator.of(context).pop();
+                    _searchManualBarcode(value.trim());
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _barcodeController.clear();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final barcode = _barcodeController.text.trim();
+                if (barcode.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  _searchManualBarcode(barcode);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Por favor ingresa un código válido'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Buscar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _searchManualBarcode(String barcode) {
+    _barcodeController.clear();
+
+    // Reproduce el sonido para simular escaneo
+    _audioPlayer.play(AssetSource('beep.mp3'));
+
+    // Busca el producto
+    context.read<ScanCubit>().scanBarcode(barcode);
+
+    // Feedback visual
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Buscando producto con código: $barcode')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,6 +193,11 @@ class _ScanPageState extends State<ScanPage> {
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.keyboard),
+            onPressed: _showManualInputDialog,
+            tooltip: 'Ingresar código manual',
+          ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
@@ -135,7 +229,7 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Buscando productos por código de barras',
+                  'Buscar productos por código de barras',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -144,8 +238,9 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Apunta la cámara hacia el código de barras del producto',
+                  'Escanea el código o usa el botón ⌨️ para ingresarlo manualmente',
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -212,6 +307,14 @@ class _ScanPageState extends State<ScanPage> {
             },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showManualInputDialog,
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.keyboard),
+        label: const Text('Código Manual'),
+        tooltip: 'Ingresar código de barras manualmente',
       ),
     );
   }
