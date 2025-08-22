@@ -10,7 +10,6 @@ class GetSalesReportUseCase {
     try {
       return await repository.getSales();
     } catch (e) {
-      print('Error al obtener reporte de ventas: $e');
       rethrow;
     }
   }
