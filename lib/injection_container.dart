@@ -28,6 +28,11 @@ import 'package:inventory_system/features/category/presentation/bloc/category_ed
 import 'package:inventory_system/features/category/presentation/bloc/category_create_cubit.dart';
 import 'package:inventory_system/features/category/data/datasources/category_remote_data_source.dart';
 import 'package:inventory_system/features/category/data/repositories/category_repository_impl.dart';
+import 'package:inventory_system/features/reports/domain/repositories/reports_repository.dart';
+import 'package:inventory_system/features/reports/domain/usecases/get_sales_report.dart';
+import 'package:inventory_system/features/reports/presentation/bloc/reports_cubit.dart';
+import 'package:inventory_system/features/reports/data/datasources/reports_remote_data_source.dart';
+import 'package:inventory_system/features/reports/data/repositories/reports_repository_impl.dart';
 import 'core/network/api_client.dart';
 
 final sl = GetIt.instance;
@@ -101,4 +106,18 @@ Future<void> init() async {
     () => CategoryEditCubit(getCategoryById: sl(), updateCategory: sl()),
   );
   sl.registerFactory(() => CategoryCreateCubit(createCategory: sl()));
+
+  // Reports Feature
+  // Data Source
+  sl.registerLazySingleton<ReportsRemoteDataSource>(
+    () => ReportsRemoteDataSourceImpl(sl()),
+  );
+  // Repository
+  sl.registerLazySingleton<ReportsRepository>(
+    () => ReportsRepositoryImpl(remoteDataSource: sl()),
+  );
+  // UseCases
+  sl.registerLazySingleton(() => GetSalesReportUseCase(repository: sl()));
+  // Cubit / Bloc
+  sl.registerFactory(() => ReportsCubit(getSalesReport: sl()));
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../product/presentation/pages/product_list_page.dart';
 import '../../../category/presentation/pages/category_list_page.dart';
+import '../../../reports/presentation/pages/reports_page.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -77,13 +78,14 @@ class AdminPage extends StatelessWidget {
                     ),
                     _buildAdminCard(
                       title: 'Reportes',
-                      subtitle: 'Ver estadísticas',
+                      subtitle: 'Ver estadísticas y ventas',
                       icon: Icons.analytics,
-                      color: Colors.green,
+                      color: Colors.indigo,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Próximamente: Reportes'),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ReportsPage(),
                           ),
                         );
                       },
