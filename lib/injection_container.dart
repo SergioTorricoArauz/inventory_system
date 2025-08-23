@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:inventory_system/features/scan/domain/repositories/scan_repository.dart';
 import 'package:inventory_system/features/scan/domain/usecases/add_scan.dart';
 import 'package:inventory_system/features/scan/domain/usecases/get_scans.dart';
+import 'package:inventory_system/features/scan/domain/usecases/create_sale.dart';
 import 'package:inventory_system/features/scan/presentation/bloc/scan_cubit.dart';
 import 'package:inventory_system/features/scan/data/datasources/scan_remote_data_source.dart';
 import 'package:inventory_system/features/scan/data/repositories/scan_repo_impl.dart';
@@ -53,9 +54,15 @@ Future<void> init() async {
   // UseCases
   sl.registerLazySingleton(() => AddScanUseCase(sl()));
   sl.registerLazySingleton(() => GetScansUseCase(sl()));
+  sl.registerLazySingleton(() => CreateSaleUseCase(repository: sl()));
   // Cubit / Bloc
   sl.registerFactory(
-    () => ScanCubit(addScan: sl(), getScans: sl(), getProductByBarcode: sl()),
+    () => ScanCubit(
+      addScan: sl(),
+      getScans: sl(),
+      getProductByBarcode: sl(),
+      createSale: sl(),
+    ),
   );
 
   // Product Feature

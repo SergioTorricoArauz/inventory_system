@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../scan/presentation/pages/scan_page.dart';
+import '../../../scan/presentation/pages/sales_page.dart';
 import 'admin_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
                   color: Colors.green,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const ScanPage()),
+                    MaterialPageRoute(builder: (_) => const SalesPage()),
                   ),
                 ),
                 const SizedBox(height: 16),
