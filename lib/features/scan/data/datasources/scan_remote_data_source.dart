@@ -27,16 +27,8 @@ class ScanRemoteDataSourceImpl implements ScanRemoteDataSource {
   @override
   Future<void> createSale(SaleRequestModel saleRequest) async {
     try {
-      print('=== API CREATE SALE DEBUG ===');
-      print('Endpoint: POST /Sales');
-      print('Request Data: ${saleRequest.toJson()}');
-
       await client.post('/Sales', saleRequest.toJson());
-
-      print('Sale created successfully');
-      print('============================');
     } catch (e) {
-      print('Error creating sale: $e');
       rethrow;
     }
   }

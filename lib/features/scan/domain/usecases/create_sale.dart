@@ -14,7 +14,6 @@ class CreateSaleUseCase {
     try {
       await repository.createSale(saleRequest);
     } catch (e) {
-      print('Error al crear venta: $e');
       rethrow;
     }
   }
