@@ -4,6 +4,7 @@ import 'package:inventory_system/features/scan/presentation/bloc/scan_cubit.dart
 import 'package:inventory_system/features/product/presentation/bloc/product_cubit.dart';
 import 'package:inventory_system/features/category/presentation/bloc/category_cubit.dart';
 import 'package:inventory_system/features/reports/presentation/bloc/reports_cubit.dart';
+import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_cubit.dart';
 import 'package:inventory_system/features/home/presentation/pages/home_page.dart';
 import 'package:inventory_system/injection_container.dart';
 import 'injection_container.dart' as di;
@@ -24,6 +25,7 @@ class MainApp extends StatelessWidget {
         BlocProvider<ProductCubit>(create: (_) => sl<ProductCubit>()),
         BlocProvider<CategoryCubit>(create: (_) => sl<CategoryCubit>()),
         BlocProvider<ReportsCubit>(create: (_) => sl<ReportsCubit>()),
+        BlocProvider<SupplierCubit>(create: (_) => sl<SupplierCubit>()),
       ],
       child: MaterialApp(
         title: 'Sistema de Inventario',

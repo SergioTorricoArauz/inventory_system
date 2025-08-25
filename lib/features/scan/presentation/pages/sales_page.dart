@@ -36,59 +36,150 @@ class _SalesPageState extends State<SalesPage> {
   }
 
   void _showManualInputDialog() {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isDesktop = screenSize.width >= 1024;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.keyboard, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Ingresar Código Manual'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Ingresa el código de barras manualmente:'),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _barcodeController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Código de barras',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.qr_code),
-                ),
-                keyboardType: TextInputType.number,
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    Navigator.of(context).pop();
-                    _searchManualBarcode(value.trim());
-                  }
-                },
+        return Dialog(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop
+                  ? 500
+                  : (isTablet ? 400 : screenSize.width * 0.9),
+              maxHeight: screenSize.height * 0.6,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.keyboard,
+                        color: Colors.blue,
+                        size: isTablet ? 28 : 24,
+                      ),
+                      SizedBox(width: isTablet ? 12 : 8),
+                      Expanded(
+                        child: Text(
+                          'Ingresar Código Manual',
+                          style: TextStyle(
+                            fontSize: isTablet ? 22 : 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: isTablet ? 24 : 16),
+
+                  // Descripción
+                  Text(
+                    'Ingresa el código de barras manualmente para agregarlo al carrito:',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 20 : 16),
+
+                  // Campo de texto
+                  TextField(
+                    controller: _barcodeController,
+                    autofocus: true,
+                    style: TextStyle(fontSize: isTablet ? 18 : 16),
+                    decoration: InputDecoration(
+                      labelText: 'Código de barras',
+                      labelStyle: TextStyle(fontSize: isTablet ? 16 : 14),
+                      hintText: 'Ej: 1234567890123',
+                      hintStyle: TextStyle(fontSize: isTablet ? 16 : 14),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.qr_code, size: isTablet ? 24 : 20),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: isTablet ? 16 : 12,
+                        horizontal: isTablet ? 16 : 12,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (value) {
+                      if (value.trim().isNotEmpty) {
+                        Navigator.of(context).pop();
+                        _searchManualBarcode(value.trim());
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: isTablet ? 32 : 24),
+
+                  // Botones
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            _barcodeController.clear();
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(fontSize: isTablet ? 16 : 14),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: isTablet ? 16 : 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final barcode = _barcodeController.text.trim();
+                            if (barcode.isNotEmpty) {
+                              Navigator.of(context).pop();
+                              _searchManualBarcode(barcode);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Por favor ingresa un código válido',
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Buscar',
+                            style: TextStyle(
+                              fontSize: isTablet ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _barcodeController.clear();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final barcode = _barcodeController.text.trim();
-                if (barcode.isNotEmpty) {
-                  Navigator.of(context).pop();
-                  _searchManualBarcode(barcode);
-                }
-              },
-              child: const Text('Buscar'),
-            ),
-          ],
         );
       },
     );

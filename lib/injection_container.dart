@@ -34,6 +34,13 @@ import 'package:inventory_system/features/reports/domain/usecases/get_sales_repo
 import 'package:inventory_system/features/reports/presentation/bloc/reports_cubit.dart';
 import 'package:inventory_system/features/reports/data/datasources/reports_remote_data_source.dart';
 import 'package:inventory_system/features/reports/data/repositories/reports_repository_impl.dart';
+import 'package:inventory_system/features/suppliers/domain/repositories/supplier_repository.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/get_suppliers.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/create_supplier.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/manage_supplier_contacts.dart';
+import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_cubit.dart';
+import 'package:inventory_system/features/suppliers/data/datasources/supplier_remote_data_source.dart';
+import 'package:inventory_system/features/suppliers/data/repositories/supplier_repository_impl.dart';
 import 'core/network/api_client.dart';
 
 final sl = GetIt.instance;
@@ -127,4 +134,26 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetSalesReportUseCase(repository: sl()));
   // Cubit / Bloc
   sl.registerFactory(() => ReportsCubit(getSalesReport: sl()));
+
+  // Suppliers Feature
+  // Data Source
+  sl.registerLazySingleton<SupplierRemoteDataSource>(
+    () => SupplierRemoteDataSource(sl()),
+  );
+  // Repository
+  sl.registerLazySingleton<SupplierRepository>(
+    () => SupplierRepositoryImpl(sl()),
+  );
+  // UseCases
+  sl.registerLazySingleton(() => GetSuppliers(sl()));
+  sl.registerLazySingleton(() => CreateSupplier(sl()));
+  sl.registerLazySingleton(() => ManageSupplierContacts(sl()));
+  // Cubit / Bloc
+  sl.registerFactory(
+    () => SupplierCubit(
+      getSuppliers: sl(),
+      createSupplier: sl(),
+      manageContacts: sl(),
+    ),
+  );
 }

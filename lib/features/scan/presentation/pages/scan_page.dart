@@ -44,126 +44,334 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _showProductDialog(BuildContext context, product) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isDesktop = screenSize.width >= 1024;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 8),
-              Text('Producto Encontrado'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Nombre: ${product.name}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text('Código: ${product.barcode}'),
-              const SizedBox(height: 4),
-              Text('Precio: \$${product.price.toStringAsFixed(2)}'),
-              const SizedBox(height: 4),
-              Text('Stock: ${product.stockQuantity} unidades'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cerrar'),
+        return Dialog(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop
+                  ? 600
+                  : (isTablet ? 500 : screenSize.width * 0.9),
+              maxHeight: screenSize.height * 0.7,
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Aquí podrías agregar lógica para agregar a carrito, etc.
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('✓ Producto verificado'),
-                    backgroundColor: Colors.green,
+            child: Padding(
+              padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: isTablet ? 32 : 28,
+                      ),
+                      SizedBox(width: isTablet ? 12 : 8),
+                      Expanded(
+                        child: Text(
+                          'Producto Encontrado',
+                          style: TextStyle(
+                            fontSize: isTablet ? 24 : 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-              child: const Text('Confirmar'),
+                  SizedBox(height: isTablet ? 24 : 16),
+
+                  // Información del producto
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isTablet ? 20 : 16),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green[200]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: isTablet ? 20 : 18,
+                            color: Colors.green[800],
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 16 : 12),
+
+                        _buildProductInfoRow(
+                          'Código:',
+                          product.barcode,
+                          Icons.qr_code,
+                          isTablet,
+                        ),
+                        SizedBox(height: isTablet ? 12 : 8),
+
+                        _buildProductInfoRow(
+                          'Precio:',
+                          '\$${product.price.toStringAsFixed(2)}',
+                          Icons.attach_money,
+                          isTablet,
+                        ),
+                        SizedBox(height: isTablet ? 12 : 8),
+
+                        _buildProductInfoRow(
+                          'Stock:',
+                          '${product.stockQuantity} unidades',
+                          Icons.inventory,
+                          isTablet,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: isTablet ? 32 : 24),
+
+                  // Botones
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Cerrar',
+                            style: TextStyle(fontSize: isTablet ? 16 : 14),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: isTablet ? 16 : 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('✓ Producto verificado'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Confirmar',
+                            style: TextStyle(
+                              fontSize: isTablet ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
   }
 
+  Widget _buildProductInfoRow(
+    String label,
+    String value,
+    IconData icon,
+    bool isTablet,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, size: isTablet ? 20 : 18, color: Colors.green[600]),
+        SizedBox(width: isTablet ? 12 : 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isTablet ? 16 : 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        SizedBox(width: isTablet ? 8 : 4),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: isTablet ? 16 : 14,
+              color: Colors.grey[800],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showManualInputDialog() {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 768;
+    final isDesktop = screenSize.width >= 1024;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.keyboard, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Ingresar Código Manual'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Ingresa el código de barras manualmente:',
-                style: TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _barcodeController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Código de barras',
-                  hintText: 'Ej: 1234567890123',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.qr_code),
-                ),
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.search,
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    Navigator.of(context).pop();
-                    _searchManualBarcode(value.trim());
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _barcodeController.clear();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
+        return Dialog(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop
+                  ? 500
+                  : (isTablet ? 400 : screenSize.width * 0.9),
+              maxHeight: screenSize.height * 0.6,
             ),
-            ElevatedButton(
-              onPressed: () {
-                final barcode = _barcodeController.text.trim();
-                if (barcode.isNotEmpty) {
-                  Navigator.of(context).pop();
-                  _searchManualBarcode(barcode);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Por favor ingresa un código válido'),
-                      backgroundColor: Colors.orange,
+            child: Padding(
+              padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.keyboard,
+                        color: Colors.blue,
+                        size: isTablet ? 28 : 24,
+                      ),
+                      SizedBox(width: isTablet ? 12 : 8),
+                      Expanded(
+                        child: Text(
+                          'Ingresar Código Manual',
+                          style: TextStyle(
+                            fontSize: isTablet ? 22 : 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: isTablet ? 24 : 16),
+
+                  // Descripción
+                  Text(
+                    'Ingresa el código de barras manualmente:',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      color: Colors.grey[600],
                     ),
-                  );
-                }
-              },
-              child: const Text('Buscar'),
+                  ),
+                  SizedBox(height: isTablet ? 20 : 16),
+
+                  // Campo de texto
+                  TextField(
+                    controller: _barcodeController,
+                    autofocus: true,
+                    style: TextStyle(fontSize: isTablet ? 18 : 16),
+                    decoration: InputDecoration(
+                      labelText: 'Código de barras',
+                      labelStyle: TextStyle(fontSize: isTablet ? 16 : 14),
+                      hintText: 'Ej: 1234567890123',
+                      hintStyle: TextStyle(fontSize: isTablet ? 16 : 14),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.qr_code, size: isTablet ? 24 : 20),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: isTablet ? 16 : 12,
+                        horizontal: isTablet ? 16 : 12,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (value) {
+                      if (value.trim().isNotEmpty) {
+                        Navigator.of(context).pop();
+                        _searchManualBarcode(value.trim());
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: isTablet ? 32 : 24),
+
+                  // Botones
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            _barcodeController.clear();
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(fontSize: isTablet ? 16 : 14),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: isTablet ? 16 : 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final barcode = _barcodeController.text.trim();
+                            if (barcode.isNotEmpty) {
+                              Navigator.of(context).pop();
+                              _searchManualBarcode(barcode);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Por favor ingresa un código válido',
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 16 : 12,
+                            ),
+                          ),
+                          child: Text(
+                            'Buscar',
+                            style: TextStyle(
+                              fontSize: isTablet ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
