@@ -7,6 +7,7 @@ import '../../domain/usecases/get_scans.dart';
 import '../../domain/usecases/create_sale.dart';
 import '../../../product/domain/entities/product.dart';
 import '../../../product/domain/usecases/get_product_by_barcode.dart';
+import '../../../product/domain/usecases/search_products_by_name.dart';
 
 part 'scan_state.dart';
 
@@ -14,6 +15,7 @@ class ScanCubit extends Cubit<ScanState> {
   final AddScanUseCase addScan;
   final GetScansUseCase getScans;
   final GetProductByBarcode getProductByBarcode;
+  final SearchProductsByName searchProductsByName;
   final CreateSaleUseCase createSale;
 
   // Lista de productos en la venta actual
@@ -23,6 +25,7 @@ class ScanCubit extends Cubit<ScanState> {
     required this.addScan,
     required this.getScans,
     required this.getProductByBarcode,
+    required this.searchProductsByName,
     required this.createSale,
   }) : super(ScanInitial());
 
@@ -40,6 +43,25 @@ class ScanCubit extends Cubit<ScanState> {
     } catch (e) {
       emit(ScanError(message: e.toString()));
     }
+  }
+
+  Future<void> searchProductsByNameForSale(String searchTerm) async {
+    emit(ScanLoading());
+    try {
+      final products = await searchProductsByName(searchTerm);
+
+      if (products.isNotEmpty) {
+        emit(ProductSearchResults(products: products, searchTerm: searchTerm));
+      } else {
+        emit(ProductNotFound(barcode: searchTerm));
+      }
+    } catch (e) {
+      emit(ScanError(message: e.toString()));
+    }
+  }
+
+  void addProductToSaleFromSearch(Product product) {
+    _addProductToSale(product);
   }
 
   void _addProductToSale(Product product) {

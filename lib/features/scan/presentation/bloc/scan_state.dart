@@ -26,6 +26,19 @@ class ProductNotFound extends ScanState {
   List<Object?> get props => [barcode];
 }
 
+class ProductSearchResults extends ScanState {
+  final List<Product> products;
+  final String searchTerm;
+
+  const ProductSearchResults({
+    required this.products,
+    required this.searchTerm,
+  });
+
+  @override
+  List<Object?> get props => [products, searchTerm];
+}
+
 class SaleLoaded extends ScanState {
   final List<SaleItem> items;
   final double totalAmount;

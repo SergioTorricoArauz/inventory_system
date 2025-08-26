@@ -50,7 +50,6 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 
-  // Widget para mostrar alertas de inventario bajo
   Widget _buildInventoryAlertsPanel(
     List<Product> criticalStock,
     List<Product> lowStock,
@@ -60,7 +59,6 @@ class _ProductListPageState extends State<ProductListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título del panel
           Row(
             children: [
               Icon(
@@ -77,7 +75,6 @@ class _ProductListPageState extends State<ProductListPage> {
           ),
           const SizedBox(height: 12),
 
-          // Alertas críticas (menos de 5)
           if (criticalStock.isNotEmpty)
             Container(
               width: double.infinity,
@@ -153,7 +150,6 @@ class _ProductListPageState extends State<ProductListPage> {
               ),
             ),
 
-          // Alertas de advertencia (5-9)
           if (lowStock.isNotEmpty)
             Container(
               width: double.infinity,
@@ -239,9 +235,7 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 
-  // Widget para construir la tarjeta de producto con indicadores de stock
   Widget _buildProductCard(Product product) {
-    // Determinar el color del indicador de stock
     Color stockColor;
     Color stockBackgroundColor;
     IconData? stockIcon;
@@ -276,7 +270,6 @@ class _ProductListPageState extends State<ProductListPage> {
             alignment: Alignment.center,
             children: [
               Icon(Icons.inventory, color: Colors.blue.shade700, size: 28),
-              // Indicador de alerta en la esquina
               if (stockIcon != null)
                 Positioned(
                   right: 2,
@@ -375,8 +368,7 @@ class _ProductListPageState extends State<ProductListPage> {
                   ),
                 );
 
-                // Si se guardaron cambios, recargar la lista
-                if (result == true && context.mounted) {
+                if (result == true && mounted) {
                   context.read<ProductCubit>().loadProducts();
                 }
               },
@@ -414,8 +406,8 @@ class _ProductListPageState extends State<ProductListPage> {
             ),
           );
 
-          // Si se guardaron cambios, recargar la lista
-          if (result == true && context.mounted) {
+          if (result == true) {
+            if (!mounted) return;
             context.read<ProductCubit>().loadProducts();
           }
         },
@@ -444,8 +436,8 @@ class _ProductListPageState extends State<ProductListPage> {
                 ),
               );
 
-              // Si se creó un producto, recargar la lista
-              if (result == true && context.mounted) {
+              if (result == true) {
+                if (!mounted) return;
                 context.read<ProductCubit>().loadProducts();
               }
             },
@@ -465,7 +457,6 @@ class _ProductListPageState extends State<ProductListPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            // Recargar la lista después de eliminar
             context.read<ProductCubit>().loadProducts();
           } else if (state is ProductDeleteError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -509,7 +500,6 @@ class _ProductListPageState extends State<ProductListPage> {
                 );
               }
 
-              // Calcular alertas de inventario
               final criticalStockProducts = products
                   .where((p) => p.stockQuantity < 5)
                   .toList();
@@ -519,7 +509,6 @@ class _ProductListPageState extends State<ProductListPage> {
 
               return Column(
                 children: [
-                  // Panel de alertas de inventario
                   if (criticalStockProducts.isNotEmpty ||
                       lowStockProducts.isNotEmpty)
                     _buildInventoryAlertsPanel(
@@ -527,7 +516,6 @@ class _ProductListPageState extends State<ProductListPage> {
                       lowStockProducts,
                     ),
 
-                  // Lista de productos
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -596,8 +584,8 @@ class _ProductListPageState extends State<ProductListPage> {
             ),
           );
 
-          // Si se creó un producto, recargar la lista
-          if (result == true && context.mounted) {
+          if (result == true) {
+            if (!mounted) return;
             context.read<ProductCubit>().loadProducts();
           }
         },
