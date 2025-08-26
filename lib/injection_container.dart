@@ -36,7 +36,9 @@ import 'package:inventory_system/features/reports/data/datasources/reports_remot
 import 'package:inventory_system/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:inventory_system/features/suppliers/domain/repositories/supplier_repository.dart';
 import 'package:inventory_system/features/suppliers/domain/usecases/get_suppliers.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/get_supplier_by_id.dart';
 import 'package:inventory_system/features/suppliers/domain/usecases/create_supplier.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/update_supplier.dart';
 import 'package:inventory_system/features/suppliers/domain/usecases/manage_supplier_contacts.dart';
 import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_cubit.dart';
 import 'package:inventory_system/features/suppliers/data/datasources/supplier_remote_data_source.dart';
@@ -146,13 +148,17 @@ Future<void> init() async {
   );
   // UseCases
   sl.registerLazySingleton(() => GetSuppliers(sl()));
+  sl.registerLazySingleton(() => GetSupplierById(sl()));
   sl.registerLazySingleton(() => CreateSupplier(sl()));
+  sl.registerLazySingleton(() => UpdateSupplier(sl()));
   sl.registerLazySingleton(() => ManageSupplierContacts(sl()));
   // Cubit / Bloc
   sl.registerFactory(
     () => SupplierCubit(
       getSuppliers: sl(),
+      getSupplierById: sl(),
       createSupplier: sl(),
+      updateSupplier: sl(),
       manageContacts: sl(),
     ),
   );

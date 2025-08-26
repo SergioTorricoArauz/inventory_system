@@ -56,3 +56,21 @@ class SupplierContactCreated extends SupplierState {
   @override
   List<Object> get props => [contact];
 }
+
+class SupplierDetailLoaded extends SupplierState {
+  final Supplier supplier;
+
+  const SupplierDetailLoaded({required this.supplier});
+
+  @override
+  List<Object> get props => [supplier];
+}
+
+class SupplierUpdated extends SupplierState {
+  final Supplier supplier;
+
+  const SupplierUpdated({required this.supplier});
+
+  @override
+  List<Object> get props => [supplier];
+}

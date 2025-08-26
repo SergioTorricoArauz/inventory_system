@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/supplier.dart';
 import '../bloc/supplier_cubit.dart';
 import '../bloc/supplier_state.dart';
+import 'supplier_form_page.dart';
 
 class SupplierContactsPage extends StatefulWidget {
   final Supplier supplier;
@@ -130,15 +131,31 @@ class _SupplierContactsPageState extends State<SupplierContactsPage> {
                             ],
                           ),
                         ),
-                        // Refresh button for mobile
-                        if (isMobile)
-                          IconButton(
-                            icon: const Icon(Icons.refresh, size: 20),
-                            onPressed: () => context
-                                .read<SupplierCubit>()
-                                .loadSupplierContacts(widget.supplier.id),
-                            tooltip: 'Actualizar contactos',
-                          ),
+                        // Action buttons
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Edit supplier button
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size: isMobile ? 18 : 20,
+                                color: const Color(0xFF2E3B4E),
+                              ),
+                              onPressed: () => _navigateToEditSupplier(),
+                              tooltip: 'Editar proveedor',
+                            ),
+                            // Refresh button for mobile
+                            if (isMobile)
+                              IconButton(
+                                icon: const Icon(Icons.refresh, size: 20),
+                                onPressed: () => context
+                                    .read<SupplierCubit>()
+                                    .loadSupplierContacts(widget.supplier.id),
+                                tooltip: 'Actualizar contactos',
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -689,5 +706,26 @@ class _SupplierContactsPageState extends State<SupplierContactsPage> {
         ),
       ),
     );
+  }
+
+  void _navigateToEditSupplier() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SupplierFormPage(supplierId: widget.supplier.id),
+      ),
+    );
+
+    // Si se editó el proveedor exitosamente, podrías actualizar la UI o regresar
+    if (result == true && mounted) {
+      // Opcional: Mostrar mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Proveedor actualizado exitosamente'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

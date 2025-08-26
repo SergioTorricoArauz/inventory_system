@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/supplier.dart';
 import '../bloc/supplier_cubit.dart';
 import '../bloc/supplier_state.dart';
 
@@ -59,7 +60,13 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
     _currencyController.text = 'USD';
 
     // Si es edición, cargar datos del proveedor
-    if (widget.supplierId != null) {}
+    if (widget.supplierId != null) {
+      _loadSupplierData();
+    }
+  }
+
+  void _loadSupplierData() {
+    context.read<SupplierCubit>().loadSupplierById(widget.supplierId!);
   }
 
   @override
@@ -615,13 +622,26 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Proveedor "${state.supplier.name}" ${_isEditing ? 'actualizado' : 'creado'} exitosamente',
+            'Proveedor "${state.supplier.name}" creado exitosamente',
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
           behavior: SnackBarBehavior.floating,
         ),
       );
       Navigator.pop(context, true); // Retornar true para indicar éxito
+    } else if (state is SupplierUpdated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Proveedor "${state.supplier.name}" actualizado exitosamente',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.pop(context, true); // Retornar true para indicar éxito
+    } else if (state is SupplierDetailLoaded) {
+      _populateForm(state.supplier);
     } else if (state is SupplierError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -631,6 +651,34 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
         ),
       );
     }
+  }
+
+  void _populateForm(Supplier supplier) {
+    _nameController.text = supplier.name;
+    _nitController.text = supplier.nitTaxId;
+    _addressController.text = supplier.address;
+    _paymentTermsController.text = supplier.paymentTerms;
+    _currencyController.text = supplier.currency;
+
+    // Necesitamos obtener email y phone de los contactos principales si existen
+    if (supplier.contacts.isNotEmpty) {
+      final primaryContact = supplier.contacts.first;
+      _emailController.text = primaryContact.email;
+      _phoneController.text = primaryContact.phone;
+    }
+
+    setState(() {
+      _isActive = supplier.isActive;
+      _selectedCurrency = supplier.currency;
+
+      // Configurar términos de pago
+      if (_paymentTermsOptions.contains(supplier.paymentTerms)) {
+        _selectedPaymentTerms = supplier.paymentTerms;
+      } else {
+        _selectedPaymentTerms = 'Personalizado';
+        _customPaymentTermsController.text = supplier.paymentTerms;
+      }
+    });
   }
 
   void _handleBackNavigation(BuildContext context) {
@@ -682,16 +730,27 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
         finalPaymentTerms = '${_customPaymentTermsController.text} días';
       }
 
-      context.read<SupplierCubit>().addSupplier(
-        name: _nameController.text.trim(),
-        nitTaxId: _nitController.text.trim(),
-        address: _addressController.text.trim(),
-        paymentTerms: finalPaymentTerms,
-        currency: _currencyController.text.trim(),
-        // email: _emailController.text.trim(),
-        // phone: _phoneController.text.trim(),
-        // isActive: _isActive,
-      );
+      if (_isEditing) {
+        // Editar proveedor existente
+        context.read<SupplierCubit>().editSupplier(
+          id: widget.supplierId!,
+          name: _nameController.text.trim(),
+          nitTaxId: _nitController.text.trim(),
+          address: _addressController.text.trim(),
+          paymentTerms: finalPaymentTerms,
+          currency: _currencyController.text.trim(),
+          isActive: _isActive,
+        );
+      } else {
+        // Crear nuevo proveedor
+        context.read<SupplierCubit>().addSupplier(
+          name: _nameController.text.trim(),
+          nitTaxId: _nitController.text.trim(),
+          address: _addressController.text.trim(),
+          paymentTerms: finalPaymentTerms,
+          currency: _currencyController.text.trim(),
+        );
+      }
     }
   }
 }

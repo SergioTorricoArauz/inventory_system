@@ -1,18 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/supplier.dart';
 import '../../domain/usecases/get_suppliers.dart';
+import '../../domain/usecases/get_supplier_by_id.dart';
 import '../../domain/usecases/create_supplier.dart';
+import '../../domain/usecases/update_supplier.dart';
 import '../../domain/usecases/manage_supplier_contacts.dart';
 import 'supplier_state.dart';
 
 class SupplierCubit extends Cubit<SupplierState> {
   final GetSuppliers getSuppliers;
+  final GetSupplierById getSupplierById;
   final CreateSupplier createSupplier;
+  final UpdateSupplier updateSupplier;
   final ManageSupplierContacts manageContacts;
 
   SupplierCubit({
     required this.getSuppliers,
+    required this.getSupplierById,
     required this.createSupplier,
+    required this.updateSupplier,
     required this.manageContacts,
   }) : super(SupplierInitial());
 
@@ -52,6 +58,46 @@ class SupplierCubit extends Cubit<SupplierState> {
 
       // Reload suppliers after creation
       await loadSuppliers();
+    } catch (e) {
+      emit(SupplierError(message: e.toString()));
+    }
+  }
+
+  Future<void> loadSupplierById(String id) async {
+    try {
+      emit(SupplierLoading());
+      final supplier = await getSupplierById(id);
+      emit(SupplierDetailLoaded(supplier: supplier));
+    } catch (e) {
+      emit(SupplierError(message: e.toString()));
+    }
+  }
+
+  Future<void> editSupplier({
+    required String id,
+    required String name,
+    required String nitTaxId,
+    required String address,
+    required String paymentTerms,
+    required String currency,
+    required bool isActive,
+  }) async {
+    try {
+      emit(SupplierLoading());
+      final supplier = Supplier(
+        id: id,
+        name: name,
+        nitTaxId: nitTaxId,
+        address: address,
+        paymentTerms: paymentTerms,
+        currency: currency,
+        isActive: isActive,
+        createdAt: DateTime.now(), // This will be ignored by the API
+        contacts: [],
+      );
+
+      final updatedSupplier = await updateSupplier(supplier);
+      emit(SupplierUpdated(supplier: updatedSupplier));
     } catch (e) {
       emit(SupplierError(message: e.toString()));
     }
