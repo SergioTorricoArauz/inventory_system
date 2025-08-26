@@ -44,6 +44,14 @@ import 'package:inventory_system/features/suppliers/domain/usecases/manage_suppl
 import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_cubit.dart';
 import 'package:inventory_system/features/suppliers/data/datasources/supplier_remote_data_source.dart';
 import 'package:inventory_system/features/suppliers/data/repositories/supplier_repository_impl.dart';
+import 'package:inventory_system/features/suppliers/domain/repositories/supplier_product_repository.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/get_supplier_products.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/create_supplier_product.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/delete_supplier_product.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/get_preferred_supplier_products.dart';
+import 'package:inventory_system/features/suppliers/data/datasources/supplier_product_remote_data_source.dart';
+import 'package:inventory_system/features/suppliers/data/repositories/supplier_product_repository_impl.dart';
+import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_product_cubit.dart';
 import 'core/network/api_client.dart';
 
 final sl = GetIt.instance;
@@ -163,6 +171,32 @@ Future<void> init() async {
       createSupplier: sl(),
       updateSupplier: sl(),
       manageContacts: sl(),
+    ),
+  );
+
+  // Supplier Products Feature
+  // Data Source
+  sl.registerLazySingleton<SupplierProductRemoteDataSource>(
+    () => SupplierProductRemoteDataSourceImpl(apiClient: sl()),
+  );
+  // Repository
+  sl.registerLazySingleton<SupplierProductRepository>(
+    () => SupplierProductRepositoryImpl(remoteDataSource: sl()),
+  );
+  // UseCases
+  sl.registerLazySingleton(() => GetSupplierProducts(repository: sl()));
+  sl.registerLazySingleton(() => CreateSupplierProduct(repository: sl()));
+  sl.registerLazySingleton(() => DeleteSupplierProduct(repository: sl()));
+  sl.registerLazySingleton(
+    () => GetPreferredSupplierProducts(repository: sl()),
+  );
+  // Cubit / Bloc
+  sl.registerFactory(
+    () => SupplierProductCubit(
+      getSupplierProducts: sl(),
+      createSupplierProduct: sl(),
+      deleteSupplierProduct: sl(),
+      getPreferredSupplierProducts: sl(),
     ),
   );
 }

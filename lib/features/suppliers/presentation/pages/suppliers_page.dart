@@ -5,6 +5,7 @@ import '../bloc/supplier_cubit.dart';
 import '../bloc/supplier_state.dart';
 import 'supplier_form_page.dart';
 import 'supplier_contacts_page.dart';
+import '../widgets/supplier_products_wrapper.dart';
 
 class SuppliersPage extends StatefulWidget {
   const SuppliersPage({super.key});
@@ -719,23 +720,62 @@ class _SuppliersPageState extends State<SuppliersPage> {
 
                 SizedBox(height: isTablet ? 12 : 8),
 
-                // Flecha de navegación
+                // Botones de acción
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      'Ver detalles',
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 12,
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w500,
+                    // Botón de productos
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () =>
+                            _navigateToSupplierProducts(context, supplier),
+                        icon: Icon(
+                          Icons.inventory_2_outlined,
+                          size: isTablet ? 18 : 16,
+                        ),
+                        label: Text(
+                          'Productos',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade50,
+                          foregroundColor: Colors.orange.shade700,
+                          elevation: 0,
+                          padding: EdgeInsets.symmetric(
+                            vertical: isTablet ? 12 : 8,
+                            horizontal: isTablet ? 16 : 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.orange.shade200),
+                          ),
+                        ),
                       ),
                     ),
-                    SizedBox(width: isTablet ? 8 : 4),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: isTablet ? 16 : 14,
-                      color: Colors.blue.shade700,
+                    SizedBox(width: isTablet ? 12 : 8),
+                    // Flecha de navegación a detalles
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Ver detalles',
+                            style: TextStyle(
+                              fontSize: isTablet ? 14 : 12,
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(width: isTablet ? 8 : 4),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: isTablet ? 16 : 14,
+                            color: Colors.blue.shade700,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -893,5 +933,16 @@ class _SuppliersPageState extends State<SuppliersPage> {
     if (context.mounted) {
       context.read<SupplierCubit>().loadSuppliers();
     }
+  }
+
+  void _navigateToSupplierProducts(
+    BuildContext context,
+    Supplier supplier,
+  ) async {
+    await SupplierProductsWrapper.navigateTo(
+      context,
+      supplier.id,
+      supplier.name,
+    );
   }
 }
