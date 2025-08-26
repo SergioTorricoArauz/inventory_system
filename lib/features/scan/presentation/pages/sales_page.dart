@@ -785,7 +785,15 @@ class _SalesPageState extends State<SalesPage> {
         onTap: product.stockQuantity > 0
             ? () {
                 context.read<ScanCubit>().addProductToSaleFromSearch(product);
-                Navigator.of(context).pop();
+                // Mostrar confirmación breve
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${product.name} agregado al carrito'),
+                    duration: const Duration(seconds: 1),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.green,
+                  ),
+                );
               }
             : null,
         child: Padding(
@@ -962,7 +970,17 @@ class _SalesPageState extends State<SalesPage> {
                           context.read<ScanCubit>().addProductToSaleFromSearch(
                             product,
                           );
-                          Navigator.of(context).pop();
+                          // Mostrar confirmación breve
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${product.name} agregado al carrito',
+                              ),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.green,
+                            ),
+                          );
                         }
                       : null,
                   icon: Icon(Icons.add_shopping_cart, size: buttonIconSize),
@@ -1003,7 +1021,17 @@ class _SalesPageState extends State<SalesPage> {
                             context
                                 .read<ScanCubit>()
                                 .addProductToSaleFromSearch(product);
-                            Navigator.of(context).pop();
+                            // Mostrar confirmación breve
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${product.name} agregado al carrito',
+                                ),
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.green,
+                              ),
+                            );
                           }
                         : null,
                     icon: Icon(

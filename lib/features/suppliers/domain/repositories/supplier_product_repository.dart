@@ -11,4 +11,5 @@ abstract class SupplierProductRepository {
     SupplierProduct supplierProduct,
   );
   Future<void> deleteSupplierProduct(String supplierId, String productId);
+  Future<int> getSupplierProductCount(String supplierId);
 }

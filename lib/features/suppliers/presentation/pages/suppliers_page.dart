@@ -711,7 +711,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
                     ],
                     _buildInfoChip(
                       Icons.inventory_2_outlined,
-                      'Productos: 0',
+                      'Productos: ${supplier.productCount}',
                       Colors.orange,
                       isTablet,
                     ),
@@ -939,10 +939,16 @@ class _SuppliersPageState extends State<SuppliersPage> {
     BuildContext context,
     Supplier supplier,
   ) async {
-    await SupplierProductsWrapper.navigateTo(
+    final result = await SupplierProductsWrapper.navigateTo(
       context,
       supplier.id,
       supplier.name,
     );
+
+    // Reload suppliers when returning from products page to update product count
+    // Solo recarga si hubo cambios o si result es null (por si acaso)
+    if (context.mounted && (result == true || result == null)) {
+      context.read<SupplierCubit>().loadSuppliers();
+    }
   }
 }

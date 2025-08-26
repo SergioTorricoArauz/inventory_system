@@ -11,6 +11,7 @@ class SupplierModel extends Equatable {
   final bool isActive;
   final String createdAt;
   final List<SupplierContactModel> contacts;
+  final int productCount;
 
   const SupplierModel({
     required this.id,
@@ -22,6 +23,7 @@ class SupplierModel extends Equatable {
     required this.isActive,
     required this.createdAt,
     required this.contacts,
+    this.productCount = 0,
   });
 
   factory SupplierModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class SupplierModel extends Equatable {
       currency: json['currency'] ?? '',
       isActive: json['isActive'] ?? true,
       createdAt: json['createdAt'] ?? '',
+      productCount: json['productCount'] ?? 0,
       contacts:
           (json['contacts'] as List<dynamic>?)
               ?.map((contact) => SupplierContactModel.fromJson(contact))
@@ -64,6 +67,7 @@ class SupplierModel extends Equatable {
       isActive: isActive,
       createdAt: DateTime.tryParse(createdAt) ?? DateTime.now(),
       contacts: contacts.map((contact) => contact.toEntity()).toList(),
+      productCount: productCount,
     );
   }
 
@@ -78,6 +82,7 @@ class SupplierModel extends Equatable {
     isActive,
     createdAt,
     contacts,
+    productCount,
   ];
 }
 

@@ -34,12 +34,12 @@ class SupplierProductsWrapper extends StatelessWidget {
   }
 
   /// Método estático para navegar fácilmente desde cualquier contexto
-  static Future<void> navigateTo(
+  static Future<bool?> navigateTo(
     BuildContext context,
     String supplierId,
     String supplierName,
   ) async {
-    await Navigator.push(
+    return await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => SupplierProductsWrapper(

@@ -7,9 +7,52 @@ class SupplierRemoteDataSource {
   SupplierRemoteDataSource(this.apiClient);
 
   Future<List<SupplierModel>> getSuppliers() async {
-    final response = await apiClient.get('/Suppliers');
-    final List<dynamic> data = response.data;
-    return data.map((supplier) => SupplierModel.fromJson(supplier)).toList();
+    try {
+      final response = await apiClient.get('/Suppliers');
+      final List<dynamic> data = response.data;
+      final suppliers = data
+          .map((supplier) => SupplierModel.fromJson(supplier))
+          .toList();
+
+      // Obtener el conteo de productos para cada proveedor
+      for (var i = 0; i < suppliers.length; i++) {
+        try {
+          final countResponse = await apiClient.get(
+            '/SupplierProducts/supplier/${suppliers[i].id}/count',
+          );
+          final productCount = countResponse.data['productCount'] ?? 0;
+          suppliers[i] = SupplierModel(
+            id: suppliers[i].id,
+            name: suppliers[i].name,
+            nitTaxId: suppliers[i].nitTaxId,
+            address: suppliers[i].address,
+            paymentTerms: suppliers[i].paymentTerms,
+            currency: suppliers[i].currency,
+            isActive: suppliers[i].isActive,
+            createdAt: suppliers[i].createdAt,
+            contacts: suppliers[i].contacts,
+            productCount: productCount,
+          );
+        } catch (e) {
+          suppliers[i] = SupplierModel(
+            id: suppliers[i].id,
+            name: suppliers[i].name,
+            nitTaxId: suppliers[i].nitTaxId,
+            address: suppliers[i].address,
+            paymentTerms: suppliers[i].paymentTerms,
+            currency: suppliers[i].currency,
+            isActive: suppliers[i].isActive,
+            createdAt: suppliers[i].createdAt,
+            contacts: suppliers[i].contacts,
+            productCount: 0,
+          );
+        }
+      }
+
+      return suppliers;
+    } catch (e) {
+      throw Exception('Error fetching suppliers: $e');
+    }
   }
 
   Future<SupplierModel> createSupplier(SupplierModel supplier) async {

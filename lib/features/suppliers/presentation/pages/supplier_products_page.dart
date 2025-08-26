@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../bloc/supplier_product_cubit.dart';
 import '../bloc/supplier_product_state.dart';
 import '../../domain/entities/supplier_product.dart';
-import '../../../product/domain/entities/product.dart';
 import '../../../../injection_container.dart';
 import 'supplier_product_form_page.dart';
 
@@ -23,6 +22,8 @@ class SupplierProductsPage extends StatefulWidget {
 }
 
 class _SupplierProductsPageState extends State<SupplierProductsPage> {
+  bool _hasChanges = false;
+
   @override
   void initState() {
     super.initState();
@@ -384,9 +385,9 @@ class _SupplierProductsPageState extends State<SupplierProductsPage> {
         vertical: isDesktop ? 8 : 6,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(isDesktop ? 8 : 6),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -436,6 +437,9 @@ class _SupplierProductsPageState extends State<SupplierProductsPage> {
     );
 
     if (result == true) {
+      setState(() {
+        _hasChanges = true;
+      });
       if (!mounted) return;
       context.read<SupplierProductCubit>().loadSupplierProducts(
         widget.supplierId,
@@ -449,115 +453,195 @@ class _SupplierProductsPageState extends State<SupplierProductsPage> {
     final isDesktop = screenSize.width >= 1024;
     final isTablet = screenSize.width >= 768 && screenSize.width < 1024;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Productos del Proveedor'),
-            Text(
-              widget.supplierName,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop && _hasChanges) {
+          Navigator.of(context).pop(true);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Productos del Proveedor'),
+              Text(
+                widget.supplierName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
+            ],
+          ),
+          backgroundColor: Colors.blue.shade700,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop(_hasChanges);
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _navigateToEditForm(null),
+              tooltip: 'Agregar producto',
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => context
+                  .read<SupplierProductCubit>()
+                  .loadSupplierProducts(widget.supplierId),
+              tooltip: 'Actualizar',
             ),
           ],
         ),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _navigateToEditForm(null),
-            tooltip: 'Agregar producto',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context
-                .read<SupplierProductCubit>()
-                .loadSupplierProducts(widget.supplierId),
-            tooltip: 'Actualizar',
-          ),
-        ],
-      ),
-      body: BlocListener<SupplierProductCubit, SupplierProductState>(
-        listener: (context, state) {
-          if (state is SupplierProductDeleted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Relación eliminada exitosamente'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            context.read<SupplierProductCubit>().loadSupplierProducts(
-              widget.supplierId,
-            );
-          } else if (state is SupplierProductError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.message}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        child: BlocBuilder<SupplierProductCubit, SupplierProductState>(
-          builder: (context, state) {
-            if (state is SupplierProductLoading) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Cargando productos...'),
-                  ],
+        body: BlocListener<SupplierProductCubit, SupplierProductState>(
+          listener: (context, state) {
+            if (state is SupplierProductDeleted) {
+              setState(() {
+                _hasChanges = true;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Relación eliminada exitosamente'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              context.read<SupplierProductCubit>().loadSupplierProducts(
+                widget.supplierId,
+              );
+            } else if (state is SupplierProductError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error: ${state.message}'),
+                  backgroundColor: Colors.red,
                 ),
               );
             }
+          },
+          child: BlocBuilder<SupplierProductCubit, SupplierProductState>(
+            builder: (context, state) {
+              if (state is SupplierProductLoading) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Cargando productos...'),
+                    ],
+                  ),
+                );
+              }
 
-            if (state is SupplierProductLoaded) {
-              if (state.supplierProducts.isEmpty) {
+              if (state is SupplierProductLoaded) {
+                if (state.supplierProducts.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: isDesktop ? 80 : 64,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: isDesktop ? 24 : 16),
+                        Text(
+                          'No hay productos asociados',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 20 : 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: isDesktop ? 12 : 8),
+                        Text(
+                          'Agrega productos a este proveedor para comenzar',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 16 : 14,
+                            color: Colors.grey[500],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: isDesktop ? 32 : 24),
+                        ElevatedButton.icon(
+                          onPressed: () => _navigateToEditForm(null),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Agregar Producto'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade700,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 24 : 20,
+                              vertical: isDesktop ? 16 : 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.all(isDesktop ? 24 : 16),
+                  itemCount: state.supplierProducts.length,
+                  itemBuilder: (context, index) {
+                    final supplierProduct = state.supplierProducts[index];
+                    return _buildSupplierProductCard(
+                      supplierProduct,
+                      isDesktop,
+                      isTablet,
+                    );
+                  },
+                );
+              }
+
+              if (state is SupplierProductError) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.inventory_2_outlined,
+                        Icons.error_outline,
                         size: isDesktop ? 80 : 64,
-                        color: Colors.grey[400],
+                        color: Colors.red,
                       ),
                       SizedBox(height: isDesktop ? 24 : 16),
                       Text(
-                        'No hay productos asociados',
+                        'Error al cargar productos',
                         style: TextStyle(
                           fontSize: isDesktop ? 20 : 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[600],
+                          color: Colors.red.shade700,
                         ),
                       ),
                       SizedBox(height: isDesktop ? 12 : 8),
-                      Text(
-                        'Agrega productos a este proveedor para comenzar',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 16 : 14,
-                          color: Colors.grey[500],
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 48 : 32,
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: isDesktop ? 16 : 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
                       ),
                       SizedBox(height: isDesktop ? 32 : 24),
                       ElevatedButton.icon(
-                        onPressed: () => _navigateToEditForm(null),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Agregar Producto'),
+                        onPressed: () => context
+                            .read<SupplierProductCubit>()
+                            .loadSupplierProducts(widget.supplierId),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reintentar'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade700,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isDesktop ? 24 : 20,
-                            vertical: isDesktop ? 16 : 12,
-                          ),
                         ),
                       ),
                     ],
@@ -565,80 +649,17 @@ class _SupplierProductsPageState extends State<SupplierProductsPage> {
                 );
               }
 
-              return ListView.builder(
-                padding: EdgeInsets.all(isDesktop ? 24 : 16),
-                itemCount: state.supplierProducts.length,
-                itemBuilder: (context, index) {
-                  final supplierProduct = state.supplierProducts[index];
-                  return _buildSupplierProductCard(
-                    supplierProduct,
-                    isDesktop,
-                    isTablet,
-                  );
-                },
-              );
-            }
-
-            if (state is SupplierProductError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: isDesktop ? 80 : 64,
-                      color: Colors.red,
-                    ),
-                    SizedBox(height: isDesktop ? 24 : 16),
-                    Text(
-                      'Error al cargar productos',
-                      style: TextStyle(
-                        fontSize: isDesktop ? 20 : 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                    SizedBox(height: isDesktop ? 12 : 8),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isDesktop ? 48 : 32,
-                      ),
-                      child: Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: isDesktop ? 16 : 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: isDesktop ? 32 : 24),
-                    ElevatedButton.icon(
-                      onPressed: () => context
-                          .read<SupplierProductCubit>()
-                          .loadSupplierProducts(widget.supplierId),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Reintentar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade700,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return const Center(child: Text('Estado inicial'));
-          },
+              return const Center(child: Text('Estado inicial'));
+            },
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _navigateToEditForm(null),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: Text(isDesktop ? 'Agregar Producto' : 'Agregar'),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _navigateToEditForm(null),
+          backgroundColor: Colors.blue.shade700,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add),
+          label: Text(isDesktop ? 'Agregar Producto' : 'Agregar'),
+        ),
       ),
     );
   }

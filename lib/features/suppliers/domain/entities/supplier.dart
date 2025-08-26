@@ -10,6 +10,7 @@ class Supplier extends Equatable {
   final bool isActive;
   final DateTime createdAt;
   final List<SupplierContact> contacts;
+  final int productCount;
 
   const Supplier({
     required this.id,
@@ -21,6 +22,7 @@ class Supplier extends Equatable {
     required this.isActive,
     required this.createdAt,
     required this.contacts,
+    this.productCount = 0,
   });
 
   @override
@@ -34,6 +36,7 @@ class Supplier extends Equatable {
     isActive,
     createdAt,
     contacts,
+    productCount,
   ];
 }
 

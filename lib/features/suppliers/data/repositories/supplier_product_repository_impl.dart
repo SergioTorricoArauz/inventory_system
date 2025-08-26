@@ -74,4 +74,13 @@ class SupplierProductRepositoryImpl implements SupplierProductRepository {
       throw Exception('Failed to delete supplier product: $e');
     }
   }
+
+  @override
+  Future<int> getSupplierProductCount(String supplierId) async {
+    try {
+      return await remoteDataSource.getSupplierProductCount(supplierId);
+    } catch (e) {
+      throw Exception('Failed to get supplier product count: $e');
+    }
+  }
 }

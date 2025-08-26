@@ -14,6 +14,7 @@ abstract class SupplierProductRemoteDataSource {
     SupplierProductModel supplierProduct,
   );
   Future<void> deleteSupplierProduct(String supplierId, String productId);
+  Future<int> getSupplierProductCount(String supplierId);
 }
 
 class SupplierProductRemoteDataSourceImpl
@@ -97,6 +98,18 @@ class SupplierProductRemoteDataSourceImpl
       );
     } catch (e) {
       throw Exception('Error deleting supplier product: $e');
+    }
+  }
+
+  @override
+  Future<int> getSupplierProductCount(String supplierId) async {
+    try {
+      final response = await apiClient.get(
+        '/SupplierProducts/supplier/$supplierId/count',
+      );
+      return response.data['productCount'] ?? 0;
+    } catch (e) {
+      throw Exception('Error fetching supplier product count: $e');
     }
   }
 }

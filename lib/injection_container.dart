@@ -49,6 +49,7 @@ import 'package:inventory_system/features/suppliers/domain/usecases/get_supplier
 import 'package:inventory_system/features/suppliers/domain/usecases/create_supplier_product.dart';
 import 'package:inventory_system/features/suppliers/domain/usecases/delete_supplier_product.dart';
 import 'package:inventory_system/features/suppliers/domain/usecases/get_preferred_supplier_products.dart';
+import 'package:inventory_system/features/suppliers/domain/usecases/get_supplier_product_count.dart';
 import 'package:inventory_system/features/suppliers/data/datasources/supplier_product_remote_data_source.dart';
 import 'package:inventory_system/features/suppliers/data/repositories/supplier_product_repository_impl.dart';
 import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_product_cubit.dart';
@@ -190,6 +191,7 @@ Future<void> init() async {
   sl.registerLazySingleton(
     () => GetPreferredSupplierProducts(repository: sl()),
   );
+  sl.registerLazySingleton(() => GetSupplierProductCount(repository: sl()));
   // Cubit / Bloc
   sl.registerFactory(
     () => SupplierProductCubit(
