@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../category/presentation/bloc/category_cubit.dart';
+import '../../../category/domain/entities/category.dart';
 
 class CategorySelectorPage extends StatefulWidget {
   final String? selectedCategoryId;
@@ -42,11 +43,42 @@ class _CategorySelectorPageState extends State<CategorySelectorPage> {
           } else if (state is CategoryLoaded ||
               state is CategoryDeleting ||
               state is CategoryDeleteError) {
-            final categories = state is CategoryLoaded
+            final originalCategories = state is CategoryLoaded
                 ? state.categories
                 : state is CategoryDeleting
                 ? state.categories
                 : (state as CategoryDeleteError).categories;
+
+            // Ordenar categorías para poner "Sin categoría" al inicio
+            final categories = List<Category>.from(originalCategories);
+            categories.sort((a, b) {
+              final aNameLower = a.name.toLowerCase();
+              final bNameLower = b.name.toLowerCase();
+
+              if (aNameLower == 'sin categoría') return -1;
+              if (bNameLower == 'sin categoría') return 1;
+              return a.name.compareTo(b.name);
+            });
+
+            // Si no hay categoría seleccionada y existe "Sin categoría", seleccionarla por defecto
+            if (_selectedCategoryId == null &&
+                widget.selectedCategoryId == null) {
+              final sinCategoriaCategory = categories.isNotEmpty
+                  ? categories.firstWhere(
+                      (category) =>
+                          category.name.toLowerCase() == 'sin categoría',
+                      orElse: () => categories.first,
+                    )
+                  : null;
+
+              if (sinCategoriaCategory != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    _selectedCategoryId = sinCategoriaCategory.id;
+                  });
+                });
+              }
+            }
 
             if (categories.isEmpty) {
               return Center(

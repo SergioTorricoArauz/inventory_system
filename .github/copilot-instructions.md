@@ -53,7 +53,7 @@ flutter clean && flutter pub get && flutter run
 ### Backend Integration
 - .NET server must run with `applicationUrl: "http://0.0.0.0:5214"` in launchSettings.json
 - Enable CORS for Flutter app communication
-- Test server accessibility: `http://192.168.0.8:5214/swagger` from mobile browser
+- Test server accessibility: `https://sergiolabs.uk/swagger/index.html` from mobile browser
 
 ### Camera Permissions
 - Android: Add `<uses-permission android:name="android.permission.CAMERA" />` to AndroidManifest.xml

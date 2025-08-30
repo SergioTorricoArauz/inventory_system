@@ -24,6 +24,38 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   String? _selectedCategoryId;
 
   @override
+  void initState() {
+    super.initState();
+    _loadDefaultCategory();
+  }
+
+  Future<void> _loadDefaultCategory() async {
+    try {
+      // Cargar categorías desde el backend
+      final categoryCubit = di.sl<CategoryCubit>();
+      await categoryCubit.loadCategories();
+
+      final state = categoryCubit.state;
+      if (state is CategoryLoaded && state.categories.isNotEmpty) {
+        // Buscar "Sin categoría" y establecerla como seleccionada por defecto
+        final sinCategoriaCategory = state.categories.firstWhere(
+          (category) => category.name.toLowerCase() == 'sin categoría',
+          orElse: () => state.categories.first,
+        );
+
+        if (mounted) {
+          setState(() {
+            _selectedCategoryId = sinCategoriaCategory.id;
+          });
+        }
+      }
+    } catch (e) {
+      // Error al cargar categorías, no hacer nada
+      debugPrint('Error al cargar categoría por defecto: $e');
+    }
+  }
+
+  @override
   void dispose() {
     _barcodeController.dispose();
     _nameController.dispose();
