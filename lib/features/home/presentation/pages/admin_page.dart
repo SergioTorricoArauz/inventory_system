@@ -3,6 +3,7 @@ import '../../../product/presentation/pages/product_list_page.dart';
 import '../../../category/presentation/pages/category_list_page.dart';
 import '../../../reports/presentation/pages/reports_page.dart';
 import '../../../suppliers/presentation/pages/suppliers_page.dart';
+import '../../../purchase_orders/presentation/pages/purchase_order_list_page.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -78,15 +79,15 @@ class AdminPage extends StatelessWidget {
                       },
                     ),
                     _buildAdminCard(
-                      title: 'Reportes',
-                      subtitle: 'Ver estadísticas y ventas',
-                      icon: Icons.analytics,
-                      color: Colors.indigo,
+                      title: 'Órdenes de Compra',
+                      subtitle: 'Gestionar órdenes',
+                      icon: Icons.shopping_cart,
+                      color: Colors.green,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const ReportsPage(),
+                            builder: (_) => const PurchaseOrderListPage(),
                           ),
                         );
                       },
@@ -101,6 +102,20 @@ class AdminPage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const SuppliersPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildAdminCard(
+                      title: 'Reportes',
+                      subtitle: 'Ver estadísticas y ventas',
+                      icon: Icons.analytics,
+                      color: Colors.indigo,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ReportsPage(),
                           ),
                         );
                       },

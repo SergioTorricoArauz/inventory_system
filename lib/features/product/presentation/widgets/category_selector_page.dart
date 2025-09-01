@@ -272,7 +272,9 @@ class _CategorySelectorPageState extends State<CategorySelectorPage> {
           children: [
             Expanded(
               child: TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop(widget.selectedCategoryId);
+                },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),

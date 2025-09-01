@@ -53,6 +53,19 @@ import 'package:inventory_system/features/suppliers/domain/usecases/get_supplier
 import 'package:inventory_system/features/suppliers/data/datasources/supplier_product_remote_data_source.dart';
 import 'package:inventory_system/features/suppliers/data/repositories/supplier_product_repository_impl.dart';
 import 'package:inventory_system/features/suppliers/presentation/bloc/supplier_product_cubit.dart';
+import 'package:inventory_system/features/purchase_orders/domain/repositories/purchase_order_repository.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/get_purchase_orders_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/get_purchase_order_by_id_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/create_purchase_order_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/update_purchase_order_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/cancel_purchase_order_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/use_cases/create_grn_use_case.dart';
+import 'package:inventory_system/features/purchase_orders/domain/usecases/get_grns_by_purchase_order_id.dart';
+import 'package:inventory_system/features/purchase_orders/presentation/cubit/purchase_order_cubit.dart';
+import 'package:inventory_system/features/purchase_orders/presentation/cubit/purchase_order_detail_cubit.dart';
+import 'package:inventory_system/features/purchase_orders/presentation/cubit/grn_cubit.dart';
+import 'package:inventory_system/features/purchase_orders/data/datasources/purchase_order_remote_data_source.dart';
+import 'package:inventory_system/features/purchase_orders/data/repositories/purchase_order_repository_impl.dart';
 import 'core/network/api_client.dart';
 
 final sl = GetIt.instance;
@@ -200,5 +213,34 @@ Future<void> init() async {
       deleteSupplierProduct: sl(),
       getPreferredSupplierProducts: sl(),
     ),
+  );
+
+  // Purchase Orders Feature
+  // Data Source
+  sl.registerLazySingleton<PurchaseOrderRemoteDataSource>(
+    () => PurchaseOrderRemoteDataSourceImpl(sl()),
+  );
+  // Repository
+  sl.registerLazySingleton<PurchaseOrderRepository>(
+    () => PurchaseOrderRepositoryImpl(remoteDataSource: sl()),
+  );
+  // UseCases
+  sl.registerLazySingleton(() => GetPurchaseOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetPurchaseOrderByIdUseCase(sl()));
+  sl.registerLazySingleton(() => CreatePurchaseOrderUseCase(sl()));
+  sl.registerLazySingleton(() => UpdatePurchaseOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CancelPurchaseOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CreateGrnUseCase(sl()));
+  sl.registerLazySingleton(() => GetGrnsByPurchaseOrderIdUseCase(sl()));
+  // Cubit / Bloc
+  sl.registerFactory(() => PurchaseOrderCubit(getPurchaseOrders: sl()));
+  sl.registerFactory(
+    () => PurchaseOrderDetailCubit(
+      getPurchaseOrderById: sl(),
+      cancelPurchaseOrder: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => GrnCubit(createGrnUseCase: sl(), getGrnsByPurchaseOrderId: sl()),
   );
 }
